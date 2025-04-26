@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <title>টুর্নামেন্ট রিপোর্ট</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f2f6ff;
+      padding: 20px;
+      margin: 0;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      color: #333;
+      margin-top: 30px;
+    }
+
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background-color: #fff;
+      padding: 15px 20px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+      text-align: center;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .stat-card:hover {
+      border-color: #007bff;
+      transform: translateY(-3px);
+    }
+
+    .stat-title {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    .section {
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #f1f1f1;
+    }
+
+    .serial {
+      width: 40px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .full-width-table {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+    }
+
+    @media screen and (max-width: 600px) {
+      table, th, td {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Trounament Page</h1>
+  <h2 style="text-align: center;">টুর্নামেন্ট রিপোর্ট</h2>
+
+  <div class="stats-container">
+    <div class="stat-card">
+      <div class="stat-title">Total Fund</div>
+      <div class="stat-value" id="totalFund">৳ 0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-title">Given Amount</div>
+      <div class="stat-value" id="givenAmount">৳ 0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-title">Remaining</div>
+      <div class="stat-value" id="remaining">৳ 0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-title">Total Matches</div>
+      <div class="stat-value" id="totalMatches">0</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Winner List</h2>
+    <div class="full-width-table">
+      <table id="winnerTable">
+        <thead>
+          <tr>
+            <th class="serial">#</th>
+            <th>Name</th>
+            <th>UID</th>
+            <th>Position</th>
+            <th>Prize</th>
+            <th>Match No</th>
+            <th>Total Point</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <button onclick="document.getElementById('participants').classList.toggle('hidden')">
+      Show/Hide Participants
+    </button>
+    <div id="participants" class="hidden">
+      <h2>Total Participants</h2>
+      <div class="full-width-table">
+        <table id="participantsTable">
+          <thead>
+            <tr>
+              <th class="serial">#</th>
+              <th>Name</th>
+              <th>UID</th>
+              <th>Entry Fee</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const sheetID = "1dqIWcpIMbhkbj4YMmL6-aqQQKuVkPF4DdwszXRAsFuQ";
+
+    const sheets = {
+      winners: `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&sheet=Winner List`,
+      participants: `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&sheet=Participants`,
+      stats: `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&sheet=Stats`
+    };
+
+    function parseSheetData(data) {
+      return JSON.parse(data.substring(47).slice(0, -2)).table.rows;
+    }
+
+    function animateCountUp(element, value, isMoney = true) {
+      let start = 0;
+      let end = parseInt(value);
+      let duration = 1000;
+      let startTime = null;
+
+      function update(currentTime) {
+        if (!startTime) startTime = currentTime;
+        let progress = currentTime - startTime;
+        let current = Math.min(Math.floor((progress / duration) * end), end);
+        element.innerText = isMoney ? `৳ ${current}` : current;
+        if (current < end) {
+          requestAnimationFrame(update);
+        }
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    function loadStats() {
+      fetch(sheets.stats)
+        .then(res => res.text())
+        .then(data => {
+          const rows = parseSheetData(data);
+          const stats = rows[0];
+          animateCountUp(document.getElementById("totalFund"), stats.c[0]?.v || 0);
+          animateCountUp(document.getElementById("givenAmount"), stats.c[1]?.v || 0);
+          animateCountUp(document.getElementById("remaining"), stats.c[2]?.v || 0);
+          animateCountUp(document.getElementById("totalMatches"), stats.c[3]?.v || 0, false);
+        });
+    }
+
+    function loadWinners() {
+      fetch(sheets.winners)
+        .then(res => res.text())
+        .then(data => {
+          const rows = parseSheetData(data);
+          const tbody = document.querySelector("#winnerTable tbody");
+          rows.forEach((row, i) => {
+            const cells = row.c.map(cell => cell?.v || '');
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${i + 1}</td>` + cells.map(c => `<td>${c}</td>`).join('');
+            tbody.appendChild(tr);
+          });
+        });
+    }
+
+    function loadParticipants() {
+      fetch(sheets.participants)
+        .then(res => res.text())
+        .then(data => {
+          const rows = parseSheetData(data);
+          const tbody = document.querySelector("#participantsTable tbody");
+          rows.forEach((row, i) => {
+            const cells = row.c.map(cell => cell?.v || '');
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${i + 1}</td>` + cells.map(c => `<td>${c}</td>`).join('');
+            tbody.appendChild(tr);
+          });
+        });
+    }
+
+    // Initial load
+    loadStats();
+    loadWinners();
+    loadParticipants();
+  </script>
+
+</body>
+</html>
