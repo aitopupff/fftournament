@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>টুর্নামেন্ট রিপোর্ট</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -110,9 +111,33 @@
         font-size: 12px;
       }
     }
+
+    /* Join Tournament Button */
+    .join-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #28a745;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      text-decoration: none;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+      z-index: 1000;
+      transition: background 0.3s;
+    }
+
+    .join-button:hover {
+      background-color: #218838;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Join Tournament Button -->
+  <a href="https://example.com/join-form" class="join-button" target="_blank">Join Tournament</a>
 
   <h1>Trounament Page</h1>
   <h2 style="text-align: center;">টুর্নামেন্ট রিপোর্ট</h2>
